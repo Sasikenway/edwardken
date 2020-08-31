@@ -1,0 +1,24 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+
+
+def ExtractData(url):
+    response = requests.get(url=url).content
+    soup = BeautifulSoup(response, "lxml")
+
+    table = soup.find("table", {"class": "table"})
+    thead = table.find("tr").find_all("th")
+    table_head = [th.text for th in thead]
+
+    table_body = table.find("tbody").find_all("tr")
+
+    with open("report.csv", "w") as csv_file:
+        csv_write = csv.writer(csv_file)
+        csv_write.writerow(table_head)
+
+        for tr in table_body:
+            table_data = [ td.text.strip() for td in tr.find_all("td") ]
+            csv_write.writerow(table_data)
+
+ExtractData(url="https://www.iitm.ac.in/academics/academic-services/fees")
